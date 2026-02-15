@@ -7,6 +7,7 @@ class ResearchEngine:
 
     def search_papers(self, query, max_results=5):
         """Searches Arxiv for papers matching the query."""
+        print(f"DEBUG: Searching Arxiv for '{query}'...")
         search = arxiv.Search(
             query=query,
             max_results=max_results,

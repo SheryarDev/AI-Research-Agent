@@ -32,23 +32,43 @@ st.markdown("Your research sessions are stored in **Long-Term Memory** for futur
 # Sidebar for memory and tools
 with st.sidebar:
     st.header("Memory & Tools")
-    if st.button("Recall Past Context"):
-        query = st.text_input("What would you like to recall?", "")
-        if query:
-            hits = st.session_state.memory.fetch_relevant_history(query)
-            st.write("Relevant past findings:")
-            for hit in hits:
-                st.info(hit.page_content)
+    
+    st.subheader("Recall Past Context")
+    memory_query = st.text_input("What would you like to recall?", key="mem_recall_input")
+    if st.button("Search Memory"):
+        if memory_query:
+            with st.spinner("Searching memory..."):
+                hits = st.session_state.memory.fetch_relevant_history(memory_query)
+                if hits:
+                    st.write("Relevant past findings:")
+                    for hit in hits:
+                        st.info(hit.page_content)
+                else:
+                    st.warning("No relevant memory found.")
+        else:
+            st.warning("Please enter a query.")
     
     st.divider()
-    st.subheader("Persistent Reading List")
-    # This would ideally be pulled from a DB, using memory for now
-    if st.button("Search Arxiv"):
-        search_query = st.text_input("Search papers:", key="arxiv_search")
+    
+    st.subheader("Arxiv Research")
+    search_query = st.text_input("Search papers:", key="arxiv_search_input")
+    if st.button("Find Papers"):
         if search_query:
-            papers = st.session_state.researcher.search_papers(search_query)
-            for p in papers:
-                st.write(f"- [{p['title']}]({p['url']})")
+            with st.spinner("Searching Arxiv..."):
+                try:
+                    papers = st.session_state.researcher.search_papers(search_query)
+                    if papers:
+                        for p in papers:
+                            st.markdown(f"**[{p['title']}]({p['url']})**")
+                            st.caption(f"Authors: {', '.join(p['authors'])}")
+                            with st.expander("Abstract"):
+                                st.write(p['summary'])
+                    else:
+                        st.warning("No papers found.")
+                except Exception as e:
+                    st.error(f"Error searching Arxiv: {e}")
+        else:
+            st.warning("Please enter a search term.")
 
 # Chat Interface
 for message in st.session_state.chat_history:

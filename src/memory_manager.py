@@ -4,6 +4,8 @@ from chromadb.config import Settings
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from datetime import datetime
+import dotenv
+dotenv.load_dotenv()
 
 class MemoryManager:
     def __init__(self, persist_directory="./chroma_db"):
@@ -33,8 +35,13 @@ class MemoryManager:
 
     def fetch_relevant_history(self, query, k=5):
         """Searches for the most relevant past research context."""
-        results = self.vector_db.similarity_search(query, k=k)
-        return results
+        try:
+            results = self.vector_db.similarity_search(query, k=k)
+            print(f"DEBUG: Memory search for '{query}' returned {len(results)} results.")
+            return results
+        except Exception as e:
+            print(f"ERROR: Memory search failed: {e}")
+            return []
 
 if __name__ == "__main__":
     # Quick test
